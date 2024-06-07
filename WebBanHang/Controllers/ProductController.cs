@@ -22,10 +22,21 @@ namespace WebBanHang.Controllers
             _hosting = hosting;
         }
         //Hiển thị danh sách sản phẩm
-        public IActionResult Index()
+        public IActionResult Index(int ? page)
         {
+            //phân trang
+            var pageIndex = (int)(page != null ? page : 1);
+            var pageSize = 5;
+
             var productList = _db.Products.Include(x => x.Category).ToList();
-            return View(productList);
+            //Thống kê số trang
+            //var pageSum = (int)Math.Ceiling((decimal)productList.Count / pageSize);
+            var pageSum = productList.Count() / pageSize + (productList.Count() % pageSize > 0 ? 1 : 0);
+            //truyền dữ liệu cho view
+            ViewBag.pageSum = pageSum;
+            ViewBag.pageIndex = pageIndex;
+
+            return View(productList.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList());
         }
         //Hiển thị form thêm sản phẩm mới
         public IActionResult Add()
@@ -128,13 +139,13 @@ namespace WebBanHang.Controllers
             //đặt lại tên file cần lưu
             var filename = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
             //lay duong dan luu tru wwwroot tren server
-            var path = Path.Combine(_hosting.WebRootPath, @"images/products");
+            var path = Path.Combine(_hosting.WebRootPath, @"images/product");
             var saveFile = Path.Combine(path, filename);
             using (var filestream = new FileStream(saveFile, FileMode.Create))
             {
                 image.CopyTo(filestream);
             }
-            return @"images/products/" + filename;
+            return @"images/product/" + filename;
         }
         //Hiển thị form xác nhận xóa sản phẩm
         public IActionResult Delete(int id)
