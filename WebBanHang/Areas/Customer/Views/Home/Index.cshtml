@@ -36,7 +36,7 @@
                         </div>
                         <!-- Product actions-->
                         <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                            <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Add to cart</a></div>
+                            <div class="text-center"><a class="addtocart btn btn-outline-dark mt-auto" data-productId="@p.Id" asp-action="AddToCart" asp-controller="Cart" asp-route-productId="@p.Id">Add to cart</a></div>
                         </div>
                     </div>
                 </div>
@@ -44,3 +44,19 @@
         </div>
     </div>
 </section>
+<div>
+    <ul class="pagination justify-content-center">
+        <li class="page-item  @(ViewBag.pageIndex == 1 ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="1">&laquo;</a>
+        </li>
+        @for (var i = 1; i <= ViewBag.pageSum; i++)
+        {
+            <li class="page-item  @(ViewBag.pageIndex == i ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@i"> @i </a>
+            </li>
+        }
+        <li class="page-item @(ViewBag.pageIndex == @ViewBag.pageSum ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@ViewBag.pageSum">&raquo;</a>
+        </li>
+    </ul>
+</div>
