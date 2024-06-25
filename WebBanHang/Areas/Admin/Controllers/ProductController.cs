@@ -13,7 +13,7 @@ using WebBanHang.Models;
 
 namespace WebBanHang.Controllers
 {
-    [Area("Areas")]
+    [Area("Admin")]
     [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {

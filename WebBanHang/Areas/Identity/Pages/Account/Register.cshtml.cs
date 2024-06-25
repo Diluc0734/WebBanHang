@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using WebBanHang.Models;
@@ -66,6 +67,8 @@ namespace WebBanHang.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
             public string FullName { get; set; }
             public DateTime BirthDay { get; set; }
+            public string Role { set; get;  }
+            public IEnumerable<SelectListItem> RoleList { set; get; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -76,6 +79,11 @@ namespace WebBanHang.Areas.Identity.Pages.Account
                 _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin)).GetAwaiter().GetResult();
                 _roleManager.CreateAsync(new IdentityRole(SD.Role_Empl)).GetAwaiter().GetResult();
             }
+
+            Input = new InputModel()
+            {
+                RoleList = _roleManager.Roles.Select(x => x.Name).Select(i => new SelectListItem { Text = i, Value = i })
+            };
 
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -90,9 +98,16 @@ namespace WebBanHang.Areas.Identity.Pages.Account
                 var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, FullName = Input.FullName, BirthDay = Input.BirthDay };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
-                {
+                { 
                     _logger.LogInformation("User created a new account with password.");
-
+                    if(!string.IsNullOrEmpty(Input.Role))
+                    {
+                        await _userManager.AddToRoleAsync(user, Input.Role);    
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, SD.Role_Cust);
+                    }
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
